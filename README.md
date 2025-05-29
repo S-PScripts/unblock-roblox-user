@@ -1,6 +1,7 @@
 # unblock-roblox-user
-To use this, 
-run curl -s https://raw.githubusercontent.com/S-PScripts/unblock-roblox-user/main/script.py -o script.py
+To use this, run:
+
+curl -s https://raw.githubusercontent.com/S-PScripts/unblock-roblox-user/main/script.py -o script.py
 python script.py
 
 To get the .ROBLOSECURITY, RBXEventTrackerV2 and RBXSessionTracker cookies:
