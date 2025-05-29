@@ -1,33 +1,44 @@
 import requests
 
-roblosecurity = 'ENTER IT HERE'
-user_to_unblock = (ENTER IT HERE)
+def main():
+    # Prompt user for inputs
+    roblosecurity = input("Enter your .ROBLOSECURITY cookie: ").strip()
+    user_to_unblock = input("Enter the user ID you want to unblock: ").strip()
+    
+    # Optional: You can prompt or leave blank for these trackers if needed
+    rbx_event_tracker = input("Enter RBXEventTrackerV2 cookie value (or leave blank): ").strip()
+    rbx_session_tracker = input("Enter RBXSessionTracker cookie value (or leave blank): ").strip()
+    
+    # Build cookie header string
+    cookie = f'.ROBLOSECURITY={roblosecurity};'
+    if rbx_event_tracker:
+        cookie += f' RBXEventTrackerV2={rbx_event_tracker};'
+    if rbx_session_tracker:
+        cookie += f' RBXSessionTracker={rbx_session_tracker};'
+    
+    session = requests.Session()
+    session.headers.update({
+        'Cookie': cookie,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Origin': 'https://www.roblox.com',
+        'Referer': 'https://www.roblox.com/',
+    })
+    
+    unblock_url = f'https://apis.roblox.com/user-blocking-api/v1/users/{user_to_unblock}/unblock-user'
+    
+    response = session.post(unblock_url)
+    
+    # If CSRF token needed, retry with token
+    if response.status_code == 403:
+        token = response.headers.get('x-csrf-token')
+        if token:
+            session.headers.update({'X-CSRF-Token': token})
+            response = session.post(unblock_url)
+    
+    print('Status:', response.status_code)
+    print('Response:', response.text)
 
-session = requests.Session()
-session.headers.update({
-    'Cookie': (
-        f'.ROBLOSECURITY={roblosecurity}; '
-        'RBXEventTrackerV2=ENTER IT HERE; '
-        'RBXSessionTracker=ENTER IT HERE;'
-    ),
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'Origin': 'https://www.roblox.com',
-    'Referer': 'https://www.roblox.com/',
-})
-
-unblock_url = f'https://apis.roblox.com/user-blocking-api/v1/users/{user_to_unblock}/unblock-user'
-
-# Try to unblock
-response = session.post(unblock_url)
-
-# If 403, get CSRF token and retry
-if response.status_code == 403:
-    token = response.headers.get('x-csrf-token')
-    if token:
-        session.headers.update({'X-CSRF-Token': token})
-        response = session.post(unblock_url)
-
-print('Status:', response.status_code)
-print('Response:', response.text)
+if __name__ == "__main__":
+    main()
